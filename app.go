@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"log"
+	"math/rand"
 	"net/http"
 
 	_ "modernc.org/sqlite"
@@ -39,9 +40,19 @@ func initDB() {
 // getRandomPlan randomly gets one of date plans from database.
 // It needs improvement because getting from DB every time is inefficient.
 func getRandomPlan(w http.ResponseWriter, r *http.Request) {
-	query := `SELECT id, title, content FROM datePlans ORDER BY RANDOM() LIMIT 1`
+	// Gets the number of rows.
+	var countRow int
+	err := db.QueryRow(`SELECT COUNT(id) FROM datePlans`).Scan(&countRow)
+	if err != nil {
+		log.Println("Database Error", err.Error())
+		renderJSONError(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+	// Gets a row randomly.
+	randomId := rand.Intn(countRow + 1)
+	query := `SELECT id, title, content FROM datePlans WHERE id = ?`
 	var p Plan
-	err := db.QueryRow(query).Scan(&p.ID, &p.Title, &p.Content)
+	err = db.QueryRow(query, randomId).Scan(&p.ID, &p.Title, &p.Content)
 	if err != nil {
 		log.Println("Database Error:", err.Error())
 		renderJSONError(w, "Internal server error", http.StatusInternalServerError)
