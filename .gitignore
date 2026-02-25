@@ -2,3 +2,5 @@ app
 datePlans.db
 go.mod
 go.sum
+
+util/seeder

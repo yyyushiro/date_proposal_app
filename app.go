@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-
 	"math/rand"
 	"net/http"
 	"strconv"
@@ -65,21 +64,6 @@ func getSizeOfRow(db *sql.DB) error {
 	}
 	return err
 }
-
-// getRandomPlan randomly gets one of date plans from database.
-// It needs improvement because getting from DB every time is inefficient.
-// func getRandomPlan(w http.ResponseWriter, r *http.Request) {
-// 	randomId := rand.Intn(sizeOfRow + 1)
-// 	query := `SELECT id, title, content FROM datePlans WHERE id = ?`
-// 	var p Plan
-// 	err := db.QueryRow(query, randomId).Scan(&p.ID, &p.Title, &p.Content)
-// 	if err != nil {
-// 		log.Println("Database Error:", err.Error())
-// 		renderJSONError(w, "Internal server error", http.StatusInternalServerError)
-// 		return
-// 	}
-// 	renderJSON(w, &p)
-// }
 
 func getRandomPlan(w http.ResponseWriter, r *http.Request) {
 	randomId := rand.Intn(sizeOfRow)
@@ -184,7 +168,7 @@ func deletePlan(w http.ResponseWriter, r *http.Request) {
 }
 
 // renderJSON renders the date plan into JSON.
-func renderJSON(w http.ResponseWriter, p *Plan) {
+func renderJSON(w http.ResponseWriter, p any) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(p)
 }
