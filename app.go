@@ -97,6 +97,27 @@ func getRandomPlan(w http.ResponseWriter, r *http.Request) {
 	renderJSON(w, &p)
 }
 
+func getPlan(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.Atoi(r.URL.Path[len("/datePlan/"):])
+	if err != nil {
+		log.Println(err)
+		renderJSONError(w, "Invalid id", http.StatusBadRequest)
+		return
+	}
+
+	query := `SELECT id, title, content, category, like FROM datePlans WHERE id = ?`
+	var p Plan
+	err = db.QueryRow(query, id).Scan(&p.ID, &p.Title, &p.Content, &p.Category, &p.Like)
+	if err != nil {
+		log.Println(err)
+		renderJSONError(w, "Internal server error", http.StatusBadRequest)
+		return
+	}
+
+	renderJSON(w, &p)
+}
+
+
 func addPlan(w http.ResponseWriter, r *http.Request) {
 	var newPlan addPlanRequest
 	err := json.NewDecoder(r.Body).Decode(&newPlan)
@@ -158,6 +179,7 @@ func main() {
 	getSizeOfRow(db)
 
 	http.HandleFunc("GET /datePlan/", getRandomPlan)
+	http.HandleFunc("GET /datePlan/{id}", getPlan)
 	http.HandleFunc("POST /datePlan/", addPlan)
 	http.HandleFunc("DELETE /datePlan/", deletePlan)
 	log.Println("Server started at :8080.")
